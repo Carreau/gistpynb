@@ -14,22 +14,16 @@ def hello():
 @app.route('/<int:id>')
 def fetch_and_render(id):
     """Fetch and render a post from the Github API"""
-    print 'am here, with id', id
     r = requests.get('https://api.github.com/gists/{}'.format(id))
 
-    print 'requests..'
     if r.status_code != 200:
         return None
 
-    print 'decoding...'
     decoded = r.json.copy()
     jsonipynb = decoded['files'].values()[0]['content']
 
-    print 'init converter...'
     converter = nbconvert.ConverterHTML()
-    print 'setting json'
     converter.nb = nbformat.reads_json(jsonipynb)
-    print 'running convert...';
     result = converter.convert()
     return result
 

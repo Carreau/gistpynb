@@ -43,7 +43,7 @@ def login():
 
 #https !
 @app.route('/urls/<path:url>')
-def render_url(url):
+def render_urls(url):
     try:
         r = requests.get('https://'+url)
 

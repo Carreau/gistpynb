@@ -35,6 +35,10 @@ def login():
     value = request.form['gistnorurl']
     if re.match('^[0-9]+$',value):
         return redirect('/'+value)
+    
+    gist = re.search(r'^https?://gist.github.com/([0-9]+)$',value)
+    if gist:
+        return redirect('/'+gist.group(1))
 
     if value.startswith('https://'):
         return redirect('/urls/'+value[8:])

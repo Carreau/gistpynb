@@ -41,7 +41,23 @@ def login():
 
     return "don't now how to access this ipynb file..."
 
+#https !
+@app.route('/urls/<path:url>')
+def render_url(url):
+    try:
+        r = requests.get('https://'+url)
 
+        if r.status_code != 200:
+            return None
+
+        converter = nbconvert.ConverterHTML()
+        converter.nb = nbformat.reads_json(r.content)
+        result = converter.convert()
+        return result
+    except ValueError :
+        abort(501)
+        
+#http ! 
 @app.route('/url/<path:url>')
 def render_url(url):
     try:

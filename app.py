@@ -5,6 +5,7 @@ import requests
 from nbformat import current as nbformat
 from flask import Flask, redirect, abort
 from flask_flatpages import FlatPages
+import re
 
 DEBUG = True
 FLATPAGES_AUTO_RELOAD = DEBUG
@@ -32,32 +33,32 @@ def page_not_found(error):
 @app.route('/create/',methods=['POST'])
 def login():
     value = request.form['gistnorurl']
-    return redirect('/'+value)
+    if re.match('^[0-9]+$',value):
+        return redirect('/'+value)
+
+    if value.startswith('https://'):
+        return redirect('/urls/'+value[8:])
+
+    if value.startswith('http://'):
+        return redirect('/urls/'+value[7:])
+
+    return "don't now how to access this ipynb file..."
 
 
 @app.route('/url/<path:url>')
 def render_url(url):
-    r = requests.get('http://'+url)
+    try:
+        r = requests.get('http://'+url)
 
-    if r.status_code != 200:
-        return None
+        if r.status_code != 200:
+            return None
 
-    converter = nbconvert.ConverterHTML()
-    converter.nb = nbformat.reads_json(r.content)
-    result = converter.convert()
-    return result
-
-@app.route('/urls/<path:url>')
-def render_url(url):
-    r = requests.get('https://'+url)
-
-    if r.status_code != 200:
-        return None
-
-    converter = nbconvert.ConverterHTML()
-    converter.nb = nbformat.reads_json(r.content)
-    result = converter.convert()
-    return result
+        converter = nbconvert.ConverterHTML()
+        converter.nb = nbformat.reads_json(r.content)
+        result = converter.convert()
+        return result
+    except ValueError :
+        abort(501)
 
 @app.route('/<int:id>')
 def fetch_and_render(id):

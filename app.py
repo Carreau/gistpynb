@@ -11,6 +11,30 @@ def hello():
     return 'Hello World!'
 
 
+@app.route('/url/<path:url>')
+def render_url(url):
+    r = requests.get('http://'+url)
+
+    if r.status_code != 200:
+        return None
+
+    converter = nbconvert.ConverterHTML()
+    converter.nb = nbformat.reads_json(r.content)
+    result = converter.convert()
+    return result
+
+@app.route('/urls/<path:url>')
+def render_url(url):
+    r = requests.get('https://'+url)
+
+    if r.status_code != 200:
+        return None
+
+    converter = nbconvert.ConverterHTML()
+    converter.nb = nbformat.reads_json(r.content)
+    result = converter.convert()
+    return result
+
 @app.route('/<int:id>')
 def fetch_and_render(id):
     """Fetch and render a post from the Github API"""
@@ -26,9 +50,6 @@ def fetch_and_render(id):
     converter.nb = nbformat.reads_json(jsonipynb)
     result = converter.convert()
     return result
-
-
-
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.

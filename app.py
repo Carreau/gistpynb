@@ -3,26 +3,36 @@ from flask import Flask , request
 import nbconvert.nbconvert as nbconvert
 import requests
 from nbformat import current as nbformat
+from flask import Flask, redirect, abort
+from flask_flatpages import FlatPages
 
+DEBUG = True
+FLATPAGES_AUTO_RELOAD = DEBUG
+FLATPAGES_EXTENSION = '.html'
 
 app = Flask(__name__)
+app.config.from_object(__name__)
+pages = FlatPages(app)
 
 @app.route('/')
 def hello():
-    return 'Hello World!'
+    return open('static/index.html').read()
 
-@app.route('/greate', methods=['POST', 'GET'])
+
+@app.route('/assets/<path:path>', methods=['GET'])
+def sitemap(path):
+    return open('static/assets/'+path).read()
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return "OHNO ! it cannot be found !" 
+    #return render_template('page_not_found.html'), 404
+
+@app.route('/create/',methods=['POST'])
 def login():
-    error = None
-    if request.method == 'POST':
-        if valid_login(request.form['username'],
-                       request.form['password']):
-            return log_the_user_in(request.form['username'])
-        else:
-            error = 'Invalid username/password'
-    # the code below this is executed if the request method
-    # was GET or the credentials were invalid
-    return render_template('login.html', error=error)
+    value = request.form['gistnorurl']
+    return redirect('/'+value)
 
 
 @app.route('/url/<path:url>')
@@ -56,13 +66,16 @@ def fetch_and_render(id):
 
     if r.status_code != 200:
         return None
+    try :
+        decoded = r.json.copy()
+        jsonipynb = decoded['files'].values()[0]['content']
 
-    decoded = r.json.copy()
-    jsonipynb = decoded['files'].values()[0]['content']
+        converter = nbconvert.ConverterHTML()
+        converter.nb = nbformat.reads_json(jsonipynb)
+        result = converter.convert()
+    except ValueError as e :
+        abort(404)
 
-    converter = nbconvert.ConverterHTML()
-    converter.nb = nbformat.reads_json(jsonipynb)
-    result = converter.convert()
     return result
 
 if __name__ == '__main__':

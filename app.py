@@ -4,7 +4,6 @@ import nbconvert.nbconvert as nbconvert
 import requests
 from nbformat import current as nbformat
 from flask import Flask, redirect, abort
-from flask_flatpages import FlatPages
 import re
 
 DEBUG = True
@@ -12,8 +11,6 @@ FLATPAGES_AUTO_RELOAD = DEBUG
 FLATPAGES_EXTENSION = '.html'
 
 app = Flask(__name__)
-app.config.from_object(__name__)
-pages = FlatPages(app)
 
 @app.route('/')
 def hello():

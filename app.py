@@ -6,10 +6,6 @@ from nbformat import current as nbformat
 from flask import Flask, redirect, abort
 import re
 
-DEBUG = True
-FLATPAGES_AUTO_RELOAD = DEBUG
-FLATPAGES_EXTENSION = '.html'
-
 app = Flask(__name__)
 
 @app.route('/')
